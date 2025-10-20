@@ -329,6 +329,13 @@ export default function CameraPunchTracker() {
       const potentialPunches: Array<{ side: WristSide; speed: number; power: number }> = [];
 
       for (const side of sides) {
+        // Define keys first before using them
+        const restKey = side === "left" ? "leftRestExtension" : "rightRestExtension";
+        const maxKey = side === "left" ? "leftMaxExtension" : "rightMaxExtension";
+        const speedHistoryKey = side === "left" ? "leftSpeedHistory" : "rightSpeedHistory";
+        const punchFlagKey = side === "left" ? "leftPunchDetected" : "rightPunchDetected";
+        const rangeNormKey = side === "left" ? "leftRangeNorm" : "rightRangeNorm";
+
         // Prefer wrist; fall back to elbow when wrist is missing/low confidence
         const wrist = side === "left" ? lw : rw;
         const elbow = side === "left" ? le : re;
@@ -377,12 +384,6 @@ export default function CameraPunchTracker() {
         };
         prev[filteredKey] = cur;
         const distToShoulder = distance(cur, { x: shoulder.x, y: shoulder.y });
-
-        const restKey = side === "left" ? "leftRestExtension" : "rightRestExtension";
-        const maxKey = side === "left" ? "leftMaxExtension" : "rightMaxExtension";
-        const speedHistoryKey = side === "left" ? "leftSpeedHistory" : "rightSpeedHistory";
-        const punchFlagKey = side === "left" ? "leftPunchDetected" : "rightPunchDetected";
-        const rangeNormKey = side === "left" ? "leftRangeNorm" : "rightRangeNorm";
 
         let rest = prev[restKey] ?? distToShoulder;
         let maxExt = prev[maxKey] ?? distToShoulder;
@@ -541,8 +542,8 @@ export default function CameraPunchTracker() {
 
         for (const punch of punches) {
           const distToShoulder = punch.side === "left"
-            ? distance({ x: lw.x, y: lw.y }, { x: ls.x, y: ls.y })
-            : distance({ x: rw.x, y: rw.y }, { x: rs.x, y: rs.y });
+            ? (lw ? distance({ x: lw.x, y: lw.y }, { x: ls.x, y: ls.y }) : (prev.leftDistToShoulder ?? 0))
+            : (rw ? distance({ x: rw.x, y: rw.y }, { x: rs.x, y: rs.y }) : (prev.rightDistToShoulder ?? 0));
 
           if (punch.side === "left") {
             pushHistory("left", punch.power);

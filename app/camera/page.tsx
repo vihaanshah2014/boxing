@@ -23,7 +23,7 @@ function getKeypoint(
   name: string
 ) {
   if (!keypoints) return undefined;
-  return keypoints.find((k) => k.name === name || k.part === name);
+  return keypoints.find((k) => k.name === name || (k as any).part === name);
 }
 
 export default function CameraPage() {
